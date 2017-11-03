@@ -4,20 +4,25 @@ from scipy import io
 from time import time
 
 import sys
-sys.path.append('/home/hugh/code/TSA_Segmentation/pc2convex')
-from utils import read_data, get_name, ostu3d, get_points, pc2img
+sys.path.append('../pc2convex')
+from my_utils import read_data, get_name, ostu3d, get_points, pc2img
 
 
-def mat2npy(fpath):
+def readmat(f):
     tic = time()
-    mat = io.loadmat(fpath)
-    fname = get_name(fpath)
+    if isinstance(f, str):        
+        fname = get_name(f)
+        
+    mat = io.loadmat(f)
     pts = np.array(mat['pts'], dtype=np.int)
     intensity = np.array(mat['intensity'])
     out = np.zeros([512, 512, 660])
     for p, i in zip(pts, intensity):
         out[tuple(p)] = i
-    print(fname, 'read in in {}s'.format(time() - tic))
+    if isinstance(f, str):
+        print(fname, 'read in in {}s'.format(time() - tic))
+    else:
+        print('file object read in in {}s'.format(time() - tic))
     return out
 
 def npy2mat(fpath, pts, intensity):
@@ -37,10 +42,11 @@ def a3d2mat(fpath, output_dir):
     intensity = []
     for pt in pts:
         intensity.append(data[tuple(pt.astype(np.int))])
-    intensity = np.array(intensity).reshape([-1, 1])
+        intensity = np.array(intensity).reshape([-1, 1])
     npy2mat(os.path.join(output_dir, fname + '.mat'), pts, intensity)
     print(fname, 'converted to .mat in {}s'.format(time() - tic))
 
-fpath = '/home/hugh/code/TSA_Segmentation/pc2convex/a3d/a3d/9657d70069ba334ec5e7dad5aa189aea.a3d'
-a3d2mat(fpath, './')
-out = mat2npy('9657d70069ba334ec5e7dad5aa189aea.mat')
+if __name__ == '__main__':
+    fpath = '/home/hugh/code/TSA_Segmentation/pc2convex/a3d/a3d/9657d70069ba334ec5e7dad5aa189aea.a3d'
+    a3d2mat(fpath, './')
+    out = readmat('9657d70069ba334ec5e7dad5aa189aea.mat')

@@ -1,6 +1,13 @@
 import numpy as np
 
+debug = False
+# --------- convex --------- #
+radius_penalty = 1
+
 # --------- frame --------- #
+last_n_cluster = 2
+last_geom = []
+ratio = 4
 penalty = 1
 min_threshold = 10 #
 verbose = False
@@ -8,8 +15,6 @@ min_count = 3
 eps = 5
 weak_link = 0.9
 strong_link=0.98
-last_n_cluster = 2
-last_geom = []
 
 #plotly
 alpha = 1
