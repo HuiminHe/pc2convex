@@ -1,6 +1,8 @@
 import numpy as np
 from body_scan import BodyScan
 from skimage.filters import threshold_otsu
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from time import  time
 import random
