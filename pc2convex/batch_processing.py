@@ -16,12 +16,12 @@ import config
 
 if_vis = True
 # on server
-#vis_dir = '../home/seg/data/seg_vis/'
-#data_path = '/home/seg/data/a3d2npy/*'
+vis_dir = '/home/seg/data/seg_vis/'
+data_path = '/home/seg/data/a3d2mat/*'
 
 #on laptop
-vis_dir = '../output/seg_vis/'
-data_path = '../data/*'
+#vis_dir = '../output/seg_vis/'
+#data_path = '../data/*'
 
 def label_mat(fpath, vis_dir):
     tic = time()
@@ -33,10 +33,12 @@ def label_mat(fpath, vis_dir):
     layers = np.linspace(0, bita.shape[2] - 1, n_layers)
     frames, flags = frame_gen(bita, layers, if_plot=False)
     label_fcn = segmentation(frames, flags, bita)
-    print(flags)
-    # labels = label_pts(dset['pts'], label_fcn=label_fcn, scaled=False)
-    # dset['labels'] = labels
-    # io.savemat(fpath, dset)
+
+    labels = label_pts(dset['pts'], label_fcn=label_fcn, scaled=False)
+    dset['labels'] = labels
+    dset['frames'] = frames
+    dset['flags'] = flags
+    io.savemat(fpath, dset)
     toc = time()
     print(fname, ' is labeled in {}s'.format(toc - tic))
     if if_vis:
@@ -57,6 +59,7 @@ if __name__ == '__main__':
     
     print('{} core is available.'.format(mp.cpu_count()))
     for f in data_dir:
+        # label_mat(f, vis_dir)
         pool.apply_async(label_mat, args=(f, vis_dir))
 
     pool.close()
