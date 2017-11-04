@@ -4,14 +4,15 @@ from scipy.interpolate import interp1d
 # from scipy import optimize
 from time import time
 import config
-from my_utils import get_points
+from my_utils import get_points, pc2img
 
 
 def label_pts(pts, label_fcn, scaled=True):
     tic = time()
     labels = []
+    pts = np.array(pts)
     if not scaled:
-        pts = (np.array(pts) / config.ratio).astype(np.int)
+        pts = (pts / config.ratio).astype(np.int)
     for pt in pts:
         labels.append(label_fcn(pt))
     print('labeling finished in {}s'.format(time() - tic))
@@ -25,43 +26,62 @@ def segmentation(frame, flags, bita):
     rl, ll, bd, ra, hd, la = limb_segment(frame, flags)
     # get knee
     flags['knee'] = ll[len(ll)//2, 2]
-    flags['knee_upper'] = flags['knee'] + 16 // config.ratio
-    flags['knee_lower'] = flags['knee'] - 16 // config.ratio
+    #flags['knee_upper'] = flags['knee'] + 16 // config.ratio
+    #flags['knee_lower'] = flags['knee'] - 16 // config.ratio
+    
+    flags['knee_lower'] = flags['knee'] + 16 // config.ratio
+    flags['knee_upper'] = (flags['knee_lower'] + ll[-1, 2]) / 2
     flags['feet'] = flags['knee_lower'] // 2
-
     # get waist
     # use half height as proposed by TA
 
     flags['thigh_left']  = ll[-1, 0] + ll[-1, 3] / 3
     flags['thigh_right'] = rl[-1, 0] - rl[-1, 3] / 3
-    flags['waist'] = bd[flags['height_in_layer'] // 2 - len(ll), 0]
-    flags['waist_left']  = bd[flags['height_in_layer'] // 2 - len(ll), 0] - ll[-1, 3] / 3
-    flags['waist_right'] = bd[flags['height_in_layer'] // 2 - len(ll), 0] + rl[-1, 3] / 3
+    # flags['waist'] = bd[flags['height_in_layer'] // 2 - len(ll), 0] + 60 // config.ratio
+
+    flags['waist_right']  = np.average(bd[:, 0]) - ll[-1, 3] / 2
+    flags['waist_left'] = np.average(bd[:,0]) + rl[-1, 3] / 2
 
     # belly and chest
-    flags['chest'] = 2 * flags['chin'] - flags['top']
-    flags['chest_th'], flags['belly_th'] = get_body_th(bita, bd, flags['chest'])
 
     # lower shoulder
-    indx = flags['shoulder_in_layer'] - len(ll) - 1
+    indx = flags['shoulder_in_layer'] - len(ll) - 3
     flags['shoulder_lower'] = bd[indx, 2]
     flags['shoulder_left_lower'] = bd[indx, 0] + bd[indx, 3]
     flags['shoulder_right_lower'] = bd[indx, 0] - bd[indx, 3]
 
     # upper shoulder
-    # flags['shoulder_upper'] = hd[0,2]
-    # flags['shoulder_left_upper'] = hd[0, 0] + hd[0, 3]
-    # flags['shoulder_right_upper'] = hd[0, 0] - hd[0, 3]
+    flags['shoulder_upper'] = hd[1,2]
+    flags['shoulder_left_upper'] = hd[1, 0] + hd[1, 3]
+    flags['shoulder_right_upper'] = hd[1, 0] - hd[1, 3]
 
     #elbow
-
+    elbow_indx = sum(np.diff((la[:len(la)//3*2, 0])) > 0)
+    flags['elbow'] = la[elbow_indx, 2] - 1
 
 
     # interpolate the centroids and the bounds
     ll, rl, bd, la, hd, ra = map(interpz, [ll, rl, bd, la, hd, ra])
+    
 
-    flags['elbow_left'] = la[2, np.argsort(la[0, :])[-1]]
-    flags['elbow_right'] = ra[2, np.argsort(ra[0, :])[0]]
+    # ---------- CORRECTION ---------- #
+    #TODO: remove all correction
+    #neck corretion
+    # hd_b = hd[2, 0]
+    # hd_m = hd[2, len(hd)//2]
+    # hd_r = int(np.average(hd[1,:])-np.amax(hd[4,:]))
+    # hd_l = int(np.average(hd[1,:]))
+    
+    # tmp = np.argmin(np.average(pc2img(bita, axis=0)[hd_b:hd_m, hd_r:hd_l], axis=1)) + hd[2, 0]
+    #print('chin corrected from {} to {}'.format(flags['chin'], tmp))
+    flags['chin'] = flags['top'] - max(flags['top'] // 8, 10)
+    flags['chest'] = int(flags['chin'] + (flags['chin'] - flags['top']) * config.chest2head)
+    #print(flags['chest'])
+    flags['chest_th'], flags['belly_th'] = get_body_th(bita, bd.T, flags['chest'])
+
+    flags['waist'] = flags['hip'] + (flags['chest'] - flags['hip']) / 3
+
+    # ---------- CORRECTION ---------- #
 
     def label(pt):
         x, y, z = pt
@@ -88,32 +108,32 @@ def segmentation(frame, flags, bita):
                 return 11
             else:
                 return -1
-
-        elif z <= min(ll[2, -1], flags['waist']):
-            if inconvex(pt, ll, relax_factor=config.thigh_relax) or inconvex(pt, rl, relax_factor=config.thigh_relax):
+            
+        elif z <= flags['hip']:
+            if inconvex(pt, ll, relax_factor=config.thigh_relax) or inconvex(pt, rl, relax_factor=config.thigh_relax) or inconvex(pt, bd, relax_factor=config.thigh_relax):
                 indx = where1d(ll[2, :], z)
-                if x < ll[0, indx] - ll[3, indx] / 6:
+                if x > ll[0, indx] - ll[3, indx] / 3:
                     return 10
-                elif x > rl[0, indx] + rl[3, indx] / 6:
+                elif x < rl[0, indx] + rl[3, indx] / 3:
                     return 8
                 else:
                     return 9
             else:
                 return -1
 
-        elif z <= max(ll[2, -1], flags['waist']):
+        elif z <= flags['waist']:
             if (inconvex(pt, ll, relax_factor=config.thigh_relax) or
                 inconvex(pt, rl, relax_factor=config.thigh_relax) or
                 inconvex(pt, bd, relax_factor=config.thigh_relax)):
                 # TODO: reverse ll and rl now. Need to fix!!!!
-                if above((x, z),
-                         [(ll[-1, 0] + ll[-1, 3] / 6, ll[2, -1]), (flags['waist_left'], flags['waist'])]):
-                    return 8
-                elif below((x, z),
-                           [(rl[-1, 0] - rl[-1, 3] / 6, rl[-1, 2]), (flags['waist_right'], flags['waist'])]):
+                if below((x, z),
+                         [(ll[0, -1] - ll[3, -1]//6, ll[2, -1]), (flags['waist_left'], flags['waist'])]):
                     return 10
-                else:
+                elif below((x, z),
+                           [(rl[0, -1] + rl[3, -1]//6, rl[2, -1]), (flags['waist_right'], flags['waist'])]):
                     return 9
+                else:
+                    return 8
             else:
                 return -1
         elif z<= flags['chest']:
@@ -126,17 +146,19 @@ def segmentation(frame, flags, bita):
             else:
                 return -1
         elif z <= flags['chin']:
-            if above((x,z), [(flags['shoulder_left_lower'], flags['shoulder_lower']),
-                             (la[0, 0], la[3, 0])]):
+            if below((x,z), [(flags['shoulder_left_lower'], flags['shoulder_lower']),
+                             (flags['shoulder_left_upper'], flags['shoulder_upper'])]):
                 return 3
-            if below((x,z), [(flags['shoulder_right_lower'], flags['shoulder_lower']),
-                             (ra[0, 0], ra[3, 0])]):
+            elif above((x,z), [(flags['shoulder_right_lower'], flags['shoulder_lower']),
+                             (flags['shoulder_right_upper'], flags['shoulder_upper'])]):
                 return 1
             elif inbox(pt, frame=bd, bound=[la[0, 0] - bd[0, 0], 0]):
                 indx = where1d(bd[2, :], z)
-                if below((x, y), [(bd[0, indx], bd[1, indx]),
-                                  (bd[0, indx] + np.cos(flags['chest_th']),
-                                   bd[1, indx] + np.sin(flags['chest_th']))]):
+                bd_x = bd[0, indx]
+                bd_y = bd[1, indx]
+                if below((x, y), [(bd_x, bd_y),
+                                  (bd_x + np.cos(flags['chest_th']),
+                                   bd_y + np.sin(flags['chest_th']))]):
                     return 5
                 else:
                     return 17
@@ -148,9 +170,15 @@ def segmentation(frame, flags, bita):
                 if z <= flags['top']:
                     return 0
             if inconvex(pt, la, relax_factor=config.arm_relax):
-                return 3
+                if z <= flags['elbow']:
+                    return 3
+                else:
+                    return 4
             elif inconvex(pt, ra, relax_factor=config.arm_relax):
-                return 1
+                if z <= flags['elbow']:                
+                    return 1
+                else:
+                    return 2
             else:
                 return -1
         # else:

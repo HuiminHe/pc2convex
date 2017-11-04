@@ -77,7 +77,7 @@ def get_height(bata):
     :return: the height in pixel, which is usually the position of hand
     '''
     pts = get_points(bata)
-    return pts[np.argsort(pts[:,2])][-len(pts)//100, 2]
+    return pts[np.argsort(pts[:,2])][-len(pts)//10000, 2]
 
 def seg_vis2d(pts, labels, fname, output_dir='./output/', savefig=True):
     '''
@@ -92,12 +92,16 @@ def seg_vis2d(pts, labels, fname, output_dir='./output/', savefig=True):
         indx = random.sample(range(len(pts)), 8000)
         pts = pts[indx]
         labels = np.array(labels)[indx]
-    pt_front = np.array([[p[0], p[2], labels[i]] for i,p in enumerate(pts) if labels[i] not in (-1, 17)], dtype=np.int16)
-    pt_side  = np.array([[p[1], p[2], labels[i]] for i,p in enumerate(pts) if (labels[i] not in (-1, 1, 2, 3, 4, 6, 8, 9, 11, 13, 15))], dtype=np.int16)
+    pt_front = np.array([[p[0], p[2], labels[i]] for i,p in enumerate(pts) if labels[i] not in (-1, )], dtype=np.int16)
+    pt_side  = np.array([[p[1], p[2], labels[i]] for i,p in enumerate(pts) if (labels[i] not in (-1, 1, 2, 3, 4, 6, 11, 13, 15))], dtype=np.int16)
     fig, axes= plt.subplots(ncols=2)
     for i, pt in enumerate(pt_front):
+        if pt[2] == 17:
+            pt[2] = 5
         axes[0].scatter(pt[0], pt[1], c=config.colors_plt[pt[2]], s=2)
     for i, pt in enumerate(pt_side):
+        if pt[2] in (8, 9, 10):
+            pt[2] = 10
         axes[1].scatter(pt[0], pt[1], c=config.colors_plt[pt[2]], s=2)
     for ax in axes:
         ax.set_xlim([0, 512 // config.ratio])

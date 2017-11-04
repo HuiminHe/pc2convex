@@ -71,7 +71,7 @@ def frame_gen(bita, layers, if_plot=False):
             flags['shoulder'] = i
             flags['shoulder_in_layer'] = j
         elif flags['last_n_cluster']==3 and len(centroids)==2:
-            flags['top'] = i
+            flags['top'] = i - flags['disp'] / 2
 
         flags['last_n_cluster'] = len(centroids)
         for cen, sz in zip(centroids, sizes):
@@ -82,7 +82,7 @@ def frame_gen(bita, layers, if_plot=False):
             b.append(sz[0])
             d.append(sz[1])
 
-    flags['chin'] = flags['top'] - (flags['top'] - flags['shoulder']) * (3/4)
+    flags['chin'] = flags['top'] - (flags['top'] - flags['shoulder']) * config.head2neck
     toc = time()
     print('frame generated in {} s'.format(toc - tic))
 

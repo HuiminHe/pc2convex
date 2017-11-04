@@ -7,7 +7,7 @@ radius_penalty = 1
 # --------- frame --------- #
 last_n_cluster = 2
 last_geom = []
-ratio = 4
+ratio = 8
 penalty = 1
 min_threshold = 10 #
 verbose = False
@@ -15,15 +15,16 @@ min_count = 3
 eps = 5
 weak_link = 0.9
 strong_link=0.98
-
+head2neck = 0.9
+chest2head = (6/6)
 # --------- segmentation --------- #
 feet_relax = 0
 leg_relax = 0
 knee_relax = 0
-thigh_relax = 0
+thigh_relax = 0.5
 belly_relax = 0
 chest_relax = 0
-arm_relax = 0.3
+arm_relax = 0.2
 head_relax = 0
 
 #plotly
@@ -34,9 +35,6 @@ colors_plt = np.array([[10, 10, 10],
               [52, 163, 80],
               [109, 109, 109],
               [246, 198, 11],
-              [109, 109, 109],
-              [246, 198, 11],
-              [109, 109, 109],
               [253, 165, 205],
               [188, 232, 57],
               [199, 182, 235],
