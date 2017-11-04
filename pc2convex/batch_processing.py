@@ -17,7 +17,7 @@ import config
 
 if_vis = True
 vis_dir = '~/data/seg_vis/'
-data_path = '~/data/a3d/*a3d'
+data_path = '/home/seg/data/a3d2npy/*mat'
 
 def label_mat(fpath):
     tic = time()
@@ -41,7 +41,7 @@ def label_mat(fpath):
 
 if __name__ == '__main__':
     data_dir = glob(data_path)
-
+    print('{} .mat files in total'.format(len(data_dir))
     if not os.path.exists(vis_dir):
         os.mkdir(vis_dir)
 
