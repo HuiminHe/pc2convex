@@ -1,5 +1,4 @@
 import multiprocessing as mp
-from multiprocessing import Process
 from npy2mat import a3d2mat
 
 if __name__ == '__main__':
