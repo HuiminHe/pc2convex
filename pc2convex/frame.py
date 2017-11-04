@@ -24,10 +24,10 @@ def frame_gen(bita, layers, if_plot=False):
     height = get_height(bita)
     flags = {'hip':0,
              'shoulder':0,
-             'neck':0,
              'top':0,
              'counts':0,
              'height':height,
+             'height_in_layer': 0,
              'last_n_cluster':2,
              'chin':0,
              'disp': np.mean(np.diff(layers)),
@@ -37,18 +37,12 @@ def frame_gen(bita, layers, if_plot=False):
              'chest':0,
              'elbow_left': 0,
              'elbow_right': 0,
-             'shoulder_left_lower': 0,
-             'shoulder_right_lower': 0,
-             'shoulder_left_higher': 0,
-             'shoulder_right_higher': 0,
-             'head': 0,
-             'lower_leg': 0,
              'thigh_left': 0,
              'thigh_right': 0
              }
     tic = time()
     geom = []
-    for i in layers.astype(np.int):
+    for j, i in enumerate(layers.astype(np.int)):
         if i > flags['height']:
             continue
         hypo = hypo_gen(i, height, flags['last_n_cluster'])
@@ -70,11 +64,12 @@ def frame_gen(bita, layers, if_plot=False):
             flags['counts'] = 1
 
         # when n cluster changes, update the flags with a rough approximation
+        flags['height_in_layer'] += 1
         if flags['last_n_cluster']==2 and len(centroids)==1:
             flags['hip'] = i - flags['disp'] / 2
         elif flags['last_n_cluster']==1 and len(centroids)==3:
             flags['shoulder'] = i
-            flags['chin'] = i + flags['disp'] / 2
+            flags['shoulder_in_layer'] = j
         elif flags['last_n_cluster']==3 and len(centroids)==2:
             flags['top'] = i
 
@@ -87,6 +82,7 @@ def frame_gen(bita, layers, if_plot=False):
             b.append(sz[0])
             d.append(sz[1])
 
+    flags['chin'] = flags['top'] - (flags['top'] - flags['shoulder']) * (3/4)
     toc = time()
     print('frame generated in {} s'.format(toc - tic))
 
@@ -156,7 +152,6 @@ def hypo_correction(pts, prob, geom, hypo):
             hypo.remove(3)
             if config.debug:
                 print('unbalanced side cluster')
-
     return hypo
 
 
@@ -172,5 +167,11 @@ def cluster_parser(x, probs, hypo, flags):
     elif n_cluster == 2:
         return [(x[1][0] + 256//config.ratio + x[1][4], x[1][2] + 256//config.ratio), (-x[1][0] + 256//config.ratio + x[1][4], x[1][2] + 256//config.ratio)], [(x[1][1], x[1][3]), (x[1][1], x[1][3])]
     elif n_cluster == 3:
-        return [(x[2][0] + x[2][1] + x[2][3] + 256//config.ratio + x[2][5], x[2][2] + 256//config.ratio), (256//config.ratio + x[2][5], x[2][2] + 256//config.ratio), (-x[2][0] - x[2][1] - x[2][3] + 256//config.ratio + x[2][5], x[2][4] + 256//config.ratio)], [(x[2][1], x[2][1]), (x[2][3], x[2][3]), (x[2][1], x[2][1])]
+        return [
+            [(x[2][0] + x[2][1] + x[2][3] + 256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
+             (256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
+
+             (-x[2][0] - x[2][1] - x[2][3] + 256//config.ratio + x[2][5], x[2][4] + 256//config.ratio)],
+            [(x[2][1], x[2][1]), (x[2][3], x[2][3]), (x[2][1], x[2][1])]
+        ]
 

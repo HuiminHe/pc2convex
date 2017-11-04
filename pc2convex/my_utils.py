@@ -79,7 +79,7 @@ def get_height(bata):
     pts = get_points(bata)
     return pts[np.argsort(pts[:,2])][-len(pts)//100, 2]
 
-def seg_vis2d(pts, labels, data, savefig=True, fname=None):
+def seg_vis2d(pts, labels, fname, output_dir='./output/', savefig=True):
     '''
     visualize the segmentation using 2d projection
     :param pts: coordinate of a point on human body
@@ -88,8 +88,8 @@ def seg_vis2d(pts, labels, data, savefig=True, fname=None):
     :return: 1 for success
     '''
 
-    if len(pts) > 5000:
-        indx = random.sample(range(len(pts)), 5000)
+    if len(pts) > 8000:
+        indx = random.sample(range(len(pts)), 8000)
         pts = pts[indx]
         labels = np.array(labels)[indx]
     pt_front = np.array([[p[0], p[2], labels[i]] for i,p in enumerate(pts) if labels[i] not in (-1, 17)], dtype=np.int16)
@@ -100,11 +100,10 @@ def seg_vis2d(pts, labels, data, savefig=True, fname=None):
     for i, pt in enumerate(pt_side):
         axes[1].scatter(pt[0], pt[1], c=config.colors_plt[pt[2]], s=2)
     for ax in axes:
-        ax.set_xlim([0, data.shape[0]])
-        ax.set_ylim([0, data.shape[2]])
+        ax.set_xlim([0, 512 // config.ratio])
+        ax.set_ylim([0, 660 // config.ratio])
     if savefig:
-        assert fname
-        plt.savefig('./outputs/' + fname + '.png')
+        plt.savefig(os.path.join(output_dir, fname + '.png'))
     else:
         plt.show()
 

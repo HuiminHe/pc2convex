@@ -16,6 +16,16 @@ eps = 5
 weak_link = 0.9
 strong_link=0.98
 
+# --------- segmentation --------- #
+feet_relax = 0
+leg_relax = 0
+knee_relax = 0
+thigh_relax = 0
+belly_relax = 0
+chest_relax = 0
+arm_relax = 0.3
+head_relax = 0
+
 #plotly
 alpha = 1
 colors_plt = np.array([[10, 10, 10],

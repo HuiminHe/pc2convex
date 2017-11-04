@@ -25,6 +25,18 @@ def readmat(f):
         print('file object read in in {}s'.format(time() - tic))
     return out
 
+def mat2npy(mat):
+    pts = np.array(mat['pts'], dtype=np.int)
+    intensity = np.array(mat['intensity'])
+    out = np.zeros([512, 512, 660])
+    for p, i in zip(pts, intensity):
+        out[tuple(p)] = i
+    if isinstance(f, str):
+        print(fname, 'read in in {}s'.format(time() - tic))
+    else:
+        print('file object read in in {}s'.format(time() - tic))
+    return out
+
 def npy2mat(fpath, pts, intensity):
     tic = time()
     mat = {'pts': pts, 'intensity': intensity}
