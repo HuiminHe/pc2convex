@@ -18,6 +18,7 @@ strong_link=0.98
 head2neck = 0.9
 chest2head = (6/6)
 # --------- segmentation --------- #
+back_compensate = 20 / ratio
 feet_relax = 0
 leg_relax = 0
 knee_relax = 0

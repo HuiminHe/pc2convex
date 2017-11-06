@@ -16,26 +16,26 @@ import config
 
 if_vis = True
 # on server
-vis_dir = '/home/seg/data/seg_vis/'
-data_path = '/home/seg/data/a3d2mat/*'
+# vis_dir = '/home/seg/data/seg_vis/'
+# data_path = '/home/seg/data/a3d2mat/*'
 
 #on laptop
-#vis_dir = '../output/seg_vis/'
-#data_path = '../data/*'
+vis_dir = '../output/seg_vis/'
+data_path = '../data/*'
 
-def label_mat(fpath, vis_dir):
+def label_mat(fpath, vis_dir=None):
     tic = time()
     fname = get_name(fpath)
     dset = io.loadmat(fpath)
     data = mat2npy(dset)
     bita = compress_data(data>0, config.ratio)
-    n_layers = 30
+    n_layers = 40
     layers = np.linspace(0, bita.shape[2] - 1, n_layers)
     frames, flags = frame_gen(bita, layers, if_plot=False)
     label_fcn = segmentation(frames, flags, bita)
 
     labels = label_pts(dset['pts'], label_fcn=label_fcn, scaled=False)
-    dset['labels'] = labels
+    dset['labels'] = labels.ravel()
     dset['frames'] = frames
     dset['flags'] = flags
     io.savemat(fpath, dset)
@@ -44,7 +44,7 @@ def label_mat(fpath, vis_dir):
     if if_vis:
         print('visualization is enabled')
         pts_ = get_points(bita, thresh=0)
-        labels_ = label_pts(pts_, label_fcn, scaled=True)
+        labels_ = label_pts(pts_, label_fcn, scaled=True).ravel()
         seg_vis2d(pts_, labels_, fname, output_dir=vis_dir, savefig=True)
         print(fname, 'is visualized in {}s'.format(time() - toc))
 
@@ -59,8 +59,8 @@ if __name__ == '__main__':
     
     print('{} core is available.'.format(mp.cpu_count()))
     for f in data_dir:
-        # label_mat(f, vis_dir)
-        pool.apply_async(label_mat, args=(f, vis_dir))
+        label_mat(f, vis_dir)
+        # pool.apply_async(label_mat, args=(f, vis_dir))
 
     pool.close()
     pool.join()
