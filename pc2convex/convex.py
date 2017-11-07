@@ -11,7 +11,7 @@ def convex_gen(pts, if_plot=False):
     centroids, sizes = cluster_gen_with_hypo(pts, n_layer, height, last_n_cluster, n_cluster=0, if_plot=False, verbose=False, config.radius_penalty=1)
     '''
     res = []
-    x1 = [0, 150//config.ratio, 0//config.ratio, 120//config.ratio]
+    x1 = [0, 100//config.ratio, 0//config.ratio, 120//config.ratio]
     x2 = [150//config.ratio, 100//config.ratio, 0//config.ratio, 100//config.ratio, 0//config.ratio]
     x3 = [10//config.ratio, 60//config.ratio, 0//config.ratio, 70//config.ratio, 0//config.ratio, 0//config.ratio]
     if len(config.last_geom):
@@ -24,7 +24,7 @@ def convex_gen(pts, if_plot=False):
         elif config.last_n_cluster == 3:
             x3 = config.last_geom[2]
 
-    bnds1 = [(-60//config.ratio, 60//config.ratio), (50//config.ratio, 200//config.ratio), (-60//config.ratio, 60//config.ratio), (50//config.ratio, 200//config.ratio)]
+    bnds1 = [(-60//config.ratio, 60//config.ratio), (50//config.ratio, 150//config.ratio), (-60//config.ratio, 60//config.ratio), (50//config.ratio, 200//config.ratio)]
     res.append(optimize.minimize(cost, x1, args=(pts, ), method='L-BFGS-B', bounds=bnds1))
 
     bnds2 = [(0//config.ratio, 256//config.ratio), (10//config.ratio, 150//config.ratio), (-100//config.ratio, 100//config.ratio), (20//config.ratio, 150//config.ratio), (-60//config.ratio, 60//config.ratio)]

@@ -16,7 +16,7 @@ def label_pts(pts, label_fcn, scaled=True):
     for pt in pts:
         labels.append(label_fcn(pt))
     print('labeling finished in {}s'.format(time() - tic))
-    return np.array(labels)
+    return np.array(labels).ravel()
 
 
 def segmentation(frame, flags, bita):
@@ -56,8 +56,9 @@ def segmentation(frame, flags, bita):
     flags['shoulder_right_upper'] = hd[1, 0] - hd[1, 3]
 
     #elbow
-    elbow_indx = sum(np.diff((la[:len(la)//3*2, 0])) > 0)
-    flags['elbow'] = la[elbow_indx, 2] - 1
+    elbow_indx1 = sum(np.diff((la[:len(la)//3*2, 0])) > 0)
+    elbow_indx2 = sum(np.diff((la[:len(ra)//3*2, 0])) < 0)
+    flags['elbow'] = max(la[elbow_indx1, 2], ra[elbow_indx2, 2])
 
 
     # interpolate the centroids and the bounds
@@ -156,9 +157,10 @@ def segmentation(frame, flags, bita):
                 indx = where1d(bd[2, :], z)
                 bd_x = bd[0, indx]
                 bd_y = bd[1, indx]
-                if below((x, y), [(bd_x, bd_y),
+                bd_d = bd[4, indx]
+                if below((x, y), [(bd_x, bd_y+bd_d/5),
                                   (bd_x + np.cos(flags['chest_th']),
-                                   bd_y + np.sin(flags['chest_th']))]):
+                                   bd_y + np.sin(flags['chest_th'])+bd_d/5)]):
                     return 5
                 else:
                     return 17

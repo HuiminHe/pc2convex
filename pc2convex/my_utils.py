@@ -79,7 +79,9 @@ def get_height(bata):
     :return: the height in pixel, which is usually the position of hand
     '''
     pts = get_points(bata)
-    return pts[np.argsort(pts[:,2])][-len(pts)//10000, 2]
+    return np.mean([pts[np.argsort(pts[:,2])][-len(pts)//10000, 2],
+                    pts[np.argsort(pts[:,2])][-len(pts)//1000, 2],
+                    pts[np.argsort(pts[:,2])][-len(pts)//100, 2]])
 
 def seg_vis2d(pts, labels, fname, output_dir='./output/', savefig=True):
     '''
@@ -93,7 +95,7 @@ def seg_vis2d(pts, labels, fname, output_dir='./output/', savefig=True):
     if len(pts) > 8000:
         indx = random.sample(range(len(pts)), 8000)
         pts = pts[indx]
-        labels = np.array(labels)[indx]
+        labels = (labels.ravel())[indx]
     pt_front = np.array([[p[0], p[2], labels[i]] for i,p in enumerate(pts) if labels[i] not in (-1, )], dtype=np.int16)
     pt_side  = np.array([[p[1], p[2], labels[i]] for i,p in enumerate(pts) if (labels[i] not in (-1, 1, 2, 3, 4, 6, 11, 13, 15))], dtype=np.int16)
     fig, axes= plt.subplots(ncols=2)

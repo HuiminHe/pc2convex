@@ -47,6 +47,8 @@ def frame_gen(bita, layers, if_plot=False):
             continue
         hypo = hypo_gen(i, height, flags['last_n_cluster'])
         pts = get_points(bita[: , :, i])
+        if len(pts) < config.min_pts:
+            continue
         geom, prob = convex_gen(pts)
         hypo = hypo_correction(pts, prob, geom, hypo)
         # hypo correction
@@ -114,7 +116,7 @@ def hypo_gen(layer, height, last_n_clusters):
             return [1, 2]# [3]
         else:
             return [1]#, [2,3]
-    elif layer < height / 3 * 2:
+    elif layer < height / 5 * 3:
             return [1]
     else:
         if last_n_clusters == 1:

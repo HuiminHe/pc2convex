@@ -5,6 +5,7 @@ debug = False
 radius_penalty = 1
 
 # --------- frame --------- #
+min_pts = 5
 last_n_cluster = 2
 last_geom = []
 ratio = 8
@@ -19,7 +20,7 @@ head2neck = 0.9
 chest2head = (6/6)
 # --------- segmentation --------- #
 back_compensate = 20 / ratio
-feet_relax = 0
+feet_relax = 0.5
 leg_relax = 0
 knee_relax = 0
 thigh_relax = 0.5
