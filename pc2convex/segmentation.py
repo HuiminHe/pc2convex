@@ -56,9 +56,9 @@ def segmentation(frame, flags, bita):
     flags['shoulder_right_upper'] = hd[1, 0] - hd[1, 3]
 
     #elbow
-    elbow_indx1 = sum(np.diff((la[:len(la)//3*2, 0])) > 0)
-    elbow_indx2 = sum(np.diff((la[:len(ra)//3*2, 0])) < 0)
-    flags['elbow'] = max(la[elbow_indx1, 2], ra[elbow_indx2, 2])
+    elbow_indx1 = sum(np.diff((la[:len(la)//3*2, 0])) >= 0)
+    elbow_indx2 = sum(np.diff((ra[:len(ra)//3*2, 0])) < 0)
+    flags['elbow'] = (la[elbow_indx1, 2] + ra[elbow_indx2, 2]) / 2.0
 
 
     # interpolate the centroids and the bounds

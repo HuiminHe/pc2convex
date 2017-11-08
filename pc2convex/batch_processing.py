@@ -16,12 +16,12 @@ import config
 
 if_vis = True
 # on server
-# vis_dir = '/home/seg/data/seg_vis/'
-# data_path = '/home/seg/data/a3d2mat/*'
+vis_dir = '/home/seg/data/seg_vis/'
+data_path = '/home/seg/data/a3d2mat/*'
 
-#on laptop
-vis_dir = '../output/seg_vis/'
-data_path = '../data/*'
+# on laptop
+# vis_dir = '../output/seg_vis/'
+# data_path = '../data/*'
 
 def label_mat(fpath, vis_dir=None):
     tic = time()
@@ -59,8 +59,8 @@ if __name__ == '__main__':
     
     print('{} core is available.'.format(mp.cpu_count()))
     for f in data_dir:
-        label_mat(f, vis_dir)
-        # pool.apply_async(label_mat, args=(f, vis_dir))
+        # label_mat(f, vis_dir)
+        pool.apply_async(label_mat, args=(f, vis_dir))
 
     pool.close()
     pool.join()
