@@ -160,6 +160,12 @@ def hypo_correction(pts, prob, geom, hypo):
             hypo.remove(2)
             if config.debug:
                 print('one arm is missing')
+
+    if 2 in hypo and 3 in hypo and prob[2] > prob[1]:
+        if sum(list(map(lambda pt: (pt[0]-256//config.ratio-geom[2][5])**2 + (pt[1]-256//config.ratio-geom[2][4])**2 < geom[2][3]**2, pts))) < config.head_min:
+            hypo.remove(3)
+            if config.debug:
+                print('less than minimal number points in head')
     return hypo
 
 

@@ -1,11 +1,12 @@
 import numpy as np
 
-debug = False
+debug = True
 # --------- convex --------- #
 radius_penalty = 1
 
 # --------- frame --------- #
 min_pts = 5
+head_min = 20
 last_n_cluster = 2
 last_geom = []
 ratio = 8
@@ -17,7 +18,7 @@ eps = 5
 weak_link = 0.9
 strong_link=0.98
 head2neck = 0.9
-chest2head = (6/5)
+chest2head = (5/4)
 # --------- segmentation --------- #
 back_compensate = 20 / ratio
 feet_relax = 0.5
