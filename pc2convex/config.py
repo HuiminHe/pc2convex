@@ -17,7 +17,7 @@ eps = 5
 weak_link = 0.9
 strong_link=0.98
 head2neck = 0.9
-chest2head = (6/6)
+chest2head = (6/5)
 # --------- segmentation --------- #
 back_compensate = 20 / ratio
 feet_relax = 0.5
