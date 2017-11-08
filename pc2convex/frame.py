@@ -154,6 +154,12 @@ def hypo_correction(pts, prob, geom, hypo):
             hypo.remove(3)
             if config.debug:
                 print('unbalanced side cluster')
+
+    if 2 in hypo and 3 in hypo and prob[1] > prob[2]:
+        if geom[1][0] < 80 // config.ratio:
+            hypo.remove(2)
+            if config.debug:
+                print('one arm is missing')
     return hypo
 
 

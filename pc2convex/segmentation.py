@@ -75,7 +75,7 @@ def segmentation(frame, flags, bita):
     
     # tmp = np.argmin(np.average(pc2img(bita, axis=0)[hd_b:hd_m, hd_r:hd_l], axis=1)) + hd[2, 0]
     #print('chin corrected from {} to {}'.format(flags['chin'], tmp))
-    flags['chin'] = flags['top'] - max(flags['top'] // 8, 10)
+    flags['chin'] = flags['top'] - max(flags['top'] // 8, 8)
     flags['chest'] = int(flags['chin'] + (flags['chin'] - flags['top']) * config.chest2head)
     #print(flags['chest'])
     flags['chest_th'], flags['belly_th'] = get_body_th(bita, bd.T, flags['chest'])
