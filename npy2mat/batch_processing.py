@@ -2,7 +2,7 @@ import multiprocessing as mp
 from npy2mat import a3d2mat
 
 if __name__ == '__main__':
-    data_dir = glob('')
+    data_dir = glob('/home/seg/data/P')
     output = './output'
     if not os.path.exists(output):
         os.mkdir(output)

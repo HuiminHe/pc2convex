@@ -18,7 +18,7 @@ eps = 5
 weak_link = 0.9
 strong_link=0.98
 head2neck = 0.9
-chest2head = (5/4)
+chest2head = (15/12)
 # --------- segmentation --------- #
 back_compensate = 20 / ratio
 feet_relax = 0.5
@@ -27,7 +27,7 @@ knee_relax = 0
 thigh_relax = 0.5
 belly_relax = 0
 chest_relax = 0
-arm_relax = 0.5
+arm_relax = 1
 head_relax = 0
 
 #plotly

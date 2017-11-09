@@ -51,7 +51,7 @@ def frame_gen(bita, layers, if_plot=False):
         if len(pts) < config.min_pts:
             continue
         geom, prob = convex_gen(pts)
-        hypo = hypo_correction(pts, prob, geom, hypo)
+        hypo = hypo_correction(pts, prob, geom, hypo, flags)
         # hypo correction
         centroids, sizes = cluster_parser(geom, prob, hypo, flags)
         config.last_n_cluster = len(centroids)
@@ -107,7 +107,6 @@ def frame_gen(bita, layers, if_plot=False):
             ax2.plot(y[i] + d[i], z[i], 'o', linewidth=1, color='g')
             ax2.plot(y[i] - d[i], z[i], 'o', linewidth=1, color='g')
         plt.show()
-
     return  (x, y, z, b, d), flags
 
 
@@ -158,13 +157,13 @@ def hypo_correction(pts, prob, geom, hypo, flags):
 
     if 2 in hypo and 3 in hypo and prob[1] > prob[2]:
         if geom[1][0] < 80 // config.ratio:
-            flags['head_clip'] = True
             if config.debug:
                 print('one arm is missing')
 
     if 2 in hypo and 3 in hypo and prob[2] > prob[1]:
         if sum(list(map(lambda pt: (pt[0]-256//config.ratio-geom[2][5])**2 + (pt[1]-256//config.ratio-geom[2][4])**2 < geom[2][3]**2, pts))) < config.head_min:
-            hypo.remove(3)
+            # hypo.remove(3)
+            flags['head_clip'] = True
             if config.debug:
                 print('less than minimal number points in head')
     return hypo
