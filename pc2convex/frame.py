@@ -38,7 +38,8 @@ def frame_gen(bita, layers, if_plot=False):
              'elbow_left': 0,
              'elbow_right': 0,
              'thigh_left': 0,
-             'thigh_right': 0
+             'thigh_right': 0,
+             'head_clip': False
              }
     tic = time()
     geom = []
@@ -127,7 +128,7 @@ def hypo_gen(layer, height, last_n_clusters):
             return [2] #, [1,3]
 
 
-def hypo_correction(pts, prob, geom, hypo):
+def hypo_correction(pts, prob, geom, hypo, flags):
     center = geom[1][4] + 256 / config.ratio
     # case1: the two cluster are close
     if geom[1][0] <= geom[1][1] * 1.1:
@@ -157,7 +158,7 @@ def hypo_correction(pts, prob, geom, hypo):
 
     if 2 in hypo and 3 in hypo and prob[1] > prob[2]:
         if geom[1][0] < 80 // config.ratio:
-            hypo.remove(2)
+            flags['head_clip'] = True
             if config.debug:
                 print('one arm is missing')
 
@@ -181,11 +182,20 @@ def cluster_parser(x, probs, hypo, flags):
     elif n_cluster == 2:
         return [(x[1][0] + 256//config.ratio + x[1][4], x[1][2] + 256//config.ratio), (-x[1][0] + 256//config.ratio + x[1][4], x[1][2] + 256//config.ratio)], [(x[1][1], x[1][3]), (x[1][1], x[1][3])]
     elif n_cluster == 3:
-        return [
-            [(x[2][0] + x[2][1] + x[2][3] + 256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
-             (256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
+        if flags['head_clip']:
+            return [
+                [(x[2][0] + x[2][1] + x[2][3] + 256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
+                                  
+                 (-x[2][0] - x[2][1] - x[2][3] + 256//config.ratio + x[2][5], x[2][4] + 256//config.ratio)],
+                [(x[2][1], x[2][1]), (x[2][1], x[2][1])]
+            ]
+        
+        else:     
+            return [
+                [(x[2][0] + x[2][1] + x[2][3] + 256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
+                 (256//config.ratio + x[2][5], x[2][2] + 256//config.ratio),
 
-             (-x[2][0] - x[2][1] - x[2][3] + 256//config.ratio + x[2][5], x[2][4] + 256//config.ratio)],
-            [(x[2][1], x[2][1]), (x[2][3], x[2][3]), (x[2][1], x[2][1])]
-        ]
+                 (-x[2][0] - x[2][1] - x[2][3] + 256//config.ratio + x[2][5], x[2][4] + 256//config.ratio)],
+                [(x[2][1], x[2][1]), (x[2][3], x[2][3]), (x[2][1], x[2][1])]
+            ]
 

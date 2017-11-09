@@ -27,7 +27,7 @@ knee_relax = 0
 thigh_relax = 0.5
 belly_relax = 0
 chest_relax = 0
-arm_relax = 0.2
+arm_relax = 0.5
 head_relax = 0
 
 #plotly
