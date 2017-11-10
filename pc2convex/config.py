@@ -6,7 +6,7 @@ radius_penalty = 1
 
 # --------- frame --------- #
 min_pts = 5
-head_min = 20
+head_min = 10
 last_n_cluster = 2
 last_geom = []
 ratio = 8
@@ -27,7 +27,7 @@ knee_relax = 0
 thigh_relax = 0.5
 belly_relax = 0
 chest_relax = 0
-arm_relax = 1
+arm_relax = 0.3
 head_relax = 0
 
 #plotly
